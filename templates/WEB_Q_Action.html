@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cheek Affiliates </title>
+    <meta name="viewport" content="width=720">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+            --button-green: #4caf50;
+            --button-hover: #45a049;
+            --button-red: #f44336;
+            --button-red-hover: #e53935;
+            --copy-blue: #2196f3;
+            --copy-hover: #1976d2;
+            --title-color: #ff9800; /* لون العنوان المميز */
+        }
+
+        body {
+            display:flex;
+            justify-content:center;
+            align-items:flex-start;
+            min-height:100vh;
+            font-family:Arial, sans-serif;
+            background:var(--bg-color);
+            color:var(--text-color);
+            padding:20px;
+            transition: all 0.3s ease;
+        }
+
+        body.light {
+            --bg-color: #eef4f1;
+            --card-bg: #ffffff;
+            --text-color: #222;
+            --border-color: #ccc;
+        }
+
+        .container {
+            width:720px;
+            background:var(--card-bg);
+            padding:25px;
+            border-radius:14px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            position:relative;
+        }
+
+        /* زر Dark Mode أعلى اليسار */
+        .darkmode-btn {
+            position:absolute;
+            top:10px;
+            left:10px;
+            font-size:20px;
+            cursor:pointer;
+            background:transparent;
+            border:none;
+            color:var(--text-color);
+        }
+
+        /* عنوان الصفحة */
+        .page-title {
+            text-align:center;
+            font-size:36px;
+            font-weight:bold;
+            color:var(--title-color);
+            margin-bottom:25px;
+        }
+
+        h2 { 
+            text-align:center;
+            margin-bottom:20px;
+            color:var(--text-color);
+            font-weight:600;
+            border-top:4px solid var(--button-green); /* خط فوق Step */
+            padding-top:10px;
+        }
+
+        .center-buttons { 
+            text-align:center; 
+            margin-bottom:15px;
+        }
+
+        textarea, select {
+            width:100%;
+            padding:10px;
+            border-radius:6px;
+            border:1px solid var(--border-color);
+            background: #2c2c2c;
+            color:var(--text-color);
+            font-size:14px;
+        }
+
+        body.light textarea, body.light select {
+            background: #fff;
+            color: var(--text-color);
+        }
+
+        button {
+            padding:6px 8px; /* تصغير البادينج */
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:12px; /* تصغير الخط */
+            white-space:nowrap; /* منع النص من النزول سطر */
+            transition: all 0.2s ease;
+        }
+
+        button:hover { opacity:0.9; }
+
+        .main-btn {
+            background:var(--button-green);
+            color:white;
+        }
+
+        .result-box {
+            margin-top:20px; /* فراغ سطر أعلى النتائج */
+            padding:15px;
+            border:1px solid var(--border-color);
+            border-radius:10px;
+            background:#1c1c1c;
+            font-size:14px; /* تكبير الخط قليلاً */
+            transition: all 0.3s ease;
+            text-align:left;
+        }
+
+        body.light .result-box { background:#fefefe; }
+
+        .point-block {
+            margin-bottom:15px;
+            padding:12px 18px;
+            border-bottom:1px dashed var(--border-color);
+            position:relative;
+            border-radius:10px;
+            background:#2c2c2c;
+            transition: all 0.2s ease;
+            text-align:left;
+        }
+
+        body.light .point-block { background:#f7f7f7; }
+
+        .point-block:hover { background:#333; }
+        body.light .point-block:hover { background:#eee; }
+
+        /* أزرار No Action و Apply Special */
+        .point-block button {
+            width:45%; 
+            height:28px; 
+            box-sizing:border-box;
+            text-align:center;
+            margin:5px auto;
+            display:block; 
+        }
+
+       
+        .point-block button.no-action-btn { background:var(--button-red); color:white; }
+        .point-block button.no-action-btn:hover { background:var(--button-red-hover); }
+
+        .point-block button.special-btn { background:var(--button-green); color:white; }
+        .point-block button.special-btn:hover { background:var(--button-hover); margin-bottom: 15px;}
+
+        .copy-container { text-align:left; margin-bottom:8px; }
+
+        #excelInput { display:none; }
+        #selectedFileName {
+            margin-top:5px;
+            font-size:12px;
+            color:var(--button-green);
+            text-align:center;
+        }
+
+        /* Special Dropdown */
+        .special-dropdown {
+            width:50%; 
+            max-height:75px;
+            overflow-y:auto;
+            background:#2c2c2c;
+            padding:6px;
+            border-radius:8px;
+            border:1px solid #555;
+            box-shadow:0 4px 12px rgba(0,0,0,0.5);
+            font-size:13px;
+            margin:10px auto 30px auto; /* فراغ أكبر بين القائمة والنتائج */
+            display:none;
+            text-align:center;
+        }
+
+        body.light .special-dropdown { background:#f1f1f1; border:1px solid #ccc; }
+
+        .special-dropdown select {
+            width:100%;
+            padding:6px 8px;
+            border-radius:6px;
+            border:1px solid #555;
+            font-size:12px;
+            background:#1c1c1c;
+            color:#fff;
+            text-align:center;
+        }
+
+        body.light .special-dropdown select { background:#fff; color:#222; }
+
+        /* Copy Button */
+        .copy-btn {
+            font-size:12px;
+            padding:5px 12px;
+            background:var(--copy-blue);
+            border-radius:15px;
+            color:white;
+            cursor:pointer;
+        }
+
+        .copy-btn:hover { background:var(--copy-hover); }
+
+        /* نتائج البوينت */
+        .copy-only {
+            font-size:14px; /* تكبير الخط */
+            margin-top: 100px;
+        }
+
+        .copy-only {
+            font-family: Arial, sans-serif; /* نفس نوع الخط المستخدم بالأزرار */
+            font-size: 14px; /* يبقى حجم الخط */
+            margin-top: 10px; /* الفراغ بين زر Apply Special Action والنتائج */
+        }
+
+        .copy-only strong {
+            color: #2196f3; /* أزرق أول سطر اسم البوينت */
+            font-weight: bold; /* يبقى بولد */
+        }
+
+
+        .copy-only span.not-found {
+        color: #f44336; /* أحمر */
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- عنوان الصفحة -->
+    <div class="page-title">Cheek Affiliates & Apply rules</div>
+
+    <!-- زر Dark/Light Mode -->
+    <button class="darkmode-btn" onclick="toggleDarkLight()">🌙</button>
+
+    <h2>Update Database</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="update_db">
+        <input type="file" id="excelInput" name="excel_file" accept=".xlsx" required>
+        <div class="center-buttons">
+            <button type="button" class="main-btn" onclick="document.getElementById('excelInput').click()">Download Latest Excel</button>
+        </div>
+        <div id="selectedFileName"></div>
+    </form>
+    {% if message %}
+    <div style="margin-top:10px;color:#4caf50;text-align:center;">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    <h2>Step 1: Get Actions</h2>
+    <form method="POST">
+        <textarea name="points" rows="4" placeholder="Enter POINT(s) each in new line"></textarea>
+        <br><br>
+        <div class="center-buttons">
+            <button name="action" value="get_actions" class="main-btn">Get Actions</button>
+        </div>
+    </form>
+
+    {% if point_result %}
+    <div class="result-box">
+        <div class="copy-container">
+            <button type="button" class="copy-btn" onclick="copyResults()">Copy</button>
+        </div>
+        <div id="resultsContent">
+            {% for item in point_result %}
+            <div class="point-block">
+                {% if not item.not_found %}
+                <button type="button" onclick="markNoAction({{ loop.index0 }}, this)" class="no-action-btn">No Action Needed</button>
+                <button type="button" id="applyBtn-{{ loop.index0 }}" onclick="toggleSpecialRule({{ loop.index0 }})" class="special-btn">Apply Special Action</button>
+                <div id="specialContainer-{{ loop.index0 }}" class="special-dropdown">
+                    <select id="specialRule-{{ loop.index0 }}" onchange="setSpecialRule({{ loop.index0 }})">
+                        <option value="(+80%) International & Local CDN 100%">(+80%) International & Local CDN 100%</option>
+                        <option value="(+80%) International">(+80%) International</option>
+                        <option value="150% Int. & 150% Local & 60% Bag CDN">150% Int. & 150% Local & 60% Bag CDN</option>
+                        <option value="(+100%) All">(+100%) All</option>
+                        <option value="(+100%) International & Local CDN 100%">(+100%) International & Local CDN 100%</option>
+                        <option value="(+1000%) All">(+1000%) All</option>
+                        <option value="80% Int. & 100% Local & 60% Bag CDN">80% Int. & 100% Local & 60% Bag CDN</option>
+                        <option value="(-50%) & 0.1 Share without BGD-CDN">(-50%) & 0.1 Share without BGD-CDN</option>
+                        <option value="(-50%) without BGD-CDN">(-50%) without BGD-CDN</option>
+                        <option value="(-80%) & 0.1 Share without BGD-CDN">(-80%) & 0.1 Share without BGD-CDN</option>
+                        <option value="Faw Rule">Faw Rule</option>
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="copy-only">
+                    <strong>{{ loop.index }}/{{ total_points }} - POINT {{ loop.index }}: {{ item.point }}</strong><br>
+                {% if item.not_found %}
+                    <span class="not-found">Point not found</span>
+                {% else %}
+                    REPEATER: {{ item.repeater }}<br>
+                    Province: {{ item.province }}<br>
+                    Q Action: {{ item.q_action }}<br>
+                    R Action: {{ item.r_action }}<br>
+                    Q Action Repeater: {{ item.q_action_repeater }}
+                {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <h2>Step 2: Apply Rule For All Affiliates</h2>
+    <form method="POST">
+        <select name="rule">
+            <option value="(+80%) International & Local CDN 100%">(+80%) International & Local CDN 100%</option>
+            <option value="(+80%) International">(+80%) International</option>
+            <option value="150% Int. & 150% Local & 60% Bag CDN">150% Int. & 150% Local & 60% Bag CDN</option>
+            <option value="(+100%) All">(+100%) All</option>
+            <option value="(+100%) International & Local CDN 100%">(+100%) International & Local CDN 100%</option>
+            <option value="(+1000%) All">(+1000%) All</option>
+            <option value="80% Int. & 100% Local & 60% Bag CDN">80% Int. & 100% Local & 60% Bag CDN</option>
+            <option value="(-50%) & 0.1 Share without BGD-CDN">(-50%) & 0.1 Share without BGD-CDN</option>
+            <option value="(-50%) without BGD-CDN">(-50%) without BGD-CDN</option>
+            <option value="(-80%) & 0.1 Share without BGD-CDN">(-80%) & 0.1 Share without BGD-CDN</option>
+            <option value="Faw Rule">Faw Rule</option>
+        </select>
+        <br><br>
+        <div class="center-buttons">
+            <button name="action" value="apply_rule" class="main-btn">Apply Rule & Generate Excel</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const excelInput = document.getElementById("excelInput");
+const selectedFileName = document.getElementById("selectedFileName");
+
+excelInput.addEventListener("change", () => {
+    if(excelInput.files.length > 0){
+        selectedFileName.textContent = excelInput.files[0].name;
+    } else {
+        selectedFileName.textContent = "";
+    }
+});
+
+function toggleSpecialRule(index){
+    const container = document.getElementById("specialContainer-" + index);
+    container.style.display = (container.style.display === "block") ? "none" : "block";
+    container.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function setSpecialRule(index){
+    const select = document.getElementById("specialRule-" + index);
+    const selectedRule = select.value;
+    fetch("/set_special_rule/" + index, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({rule: selectedRule})
+    });
+}
+
+function markNoAction(index, btn) {
+    fetch("/mark_no_action/" + index, { method: "POST" }).then(() => {
+        btn.innerText = "No Action ✅";
+        btn.style.background = "#4caf50";
+        btn.disabled = true;
+    });
+}
+
+function copyResults() {
+    const copyDivs = document.querySelectorAll(".copy-only");
+    const text = Array.from(copyDivs)
+        .map(d => d.innerText.trim())
+        .join("\n----------------\n\n");
+    let textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+    const btn = document.querySelector(".copy-btn");
+    btn.innerText = "Copied ✅";
+    setTimeout(() => { btn.innerText = "Copy"; }, 1500);
+}
+
+function toggleDarkLight() {
+    document.body.classList.toggle("light");
+}
+</script>
+</body>
+</html>
