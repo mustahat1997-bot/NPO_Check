@@ -9,7 +9,8 @@ from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 import uuid
 from io import BytesIO
-import json   # 🔥 NEW
+import json   
+import pymysql
 
 STEP1_CACHE = {}
 
@@ -93,10 +94,27 @@ def get_repeater_and_province_from_excel(point_name):
     return "No Repeater", "No Province"
 
 # =========================================================
-# 🔹 Database
+# 🔹 Database 
 # =========================================================
-def ensure_table_exists():
-    conn = sqlite3.connect(DB_PATH)
+
+
+# 🔥 عدل هاي حسب السيرفر مالك
+DB_CONFIG = {
+    "host": "localhost",      # أو IP السيرفر
+    "user": "root",
+    "password": "YOUR_PASSWORD",
+    "database": "q_actions_db",
+    "charset": "utf8mb4"
+}
+
+
+def connect_db():
+    conn = pymysql.connect(**DB_CONFIG)
+    ensure_table_exists(conn)
+    return conn
+
+
+def ensure_table_exists(conn):
     cursor = conn.cursor()
 
     cursor.execute(f"""
@@ -109,7 +127,6 @@ def ensure_table_exists():
     """)
 
     conn.commit()
-    conn.close()
 
 
 def excel_to_dataframe(uploaded_file):
@@ -137,16 +154,28 @@ def excel_to_dataframe(uploaded_file):
     return df
 
 
-def save_to_sqlite(df):
-    ensure_table_exists()
-    conn = sqlite3.connect(DB_PATH)
-    df.to_sql(TABLE_NAME, conn, if_exists="replace", index=False)
+# 🔥 بديل to_sql
+def save_to_db(df):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    # حذف البيانات القديمة
+    cursor.execute(f"DELETE FROM {TABLE_NAME}")
+
+    # إدخال البيانات الجديدة
+    for _, row in df.iterrows():
+        cursor.execute(f"""
+            INSERT INTO {TABLE_NAME} (name, site_code, q_action, repeater_action)
+            VALUES (%s, %s, %s, %s)
+        """, (
+            row["name"],
+            row["site_code"],
+            row["q_action"],
+            row["repeater_action"]
+        ))
+
+    conn.commit()
     conn.close()
-
-
-def connect_db():
-    ensure_table_exists()
-    return sqlite3.connect(DB_PATH)
 
 
 def get_actions_from_db(cursor, value):
@@ -155,7 +184,7 @@ def get_actions_from_db(cursor, value):
     cursor.execute(f"""
         SELECT q_action, repeater_action
         FROM {TABLE_NAME}
-        WHERE REPLACE(LOWER(name), ' ', '') = ?
+        WHERE REPLACE(LOWER(name), ' ', '') = %s
         LIMIT 1
     """, (normalized_value,))
 
@@ -173,7 +202,7 @@ def get_q_action_by_site_code(cursor, site_code):
     cursor.execute(f"""
         SELECT q_action
         FROM {TABLE_NAME}
-        WHERE REPLACE(LOWER(site_code), ' ', '') = ?
+        WHERE REPLACE(LOWER(site_code), ' ', '') = %s
         LIMIT 1
     """, (normalized_value,))
 
@@ -402,7 +431,7 @@ def index():
             if file and file.filename.endswith(".xlsx"):
                 try:
                     df = excel_to_dataframe(file)
-                    save_to_sqlite(df)
+                    save_to_db(df)
                     message = "✅ DB updated"
                     excel_file = file.filename
                 except Exception as e:
